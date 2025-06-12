@@ -6,7 +6,7 @@ The CNN architecture is designed from scratch (without transfer learning) to ach
 ---
 
 ## Project Structure
-
+```
 dl_tp/
 ├── dataset/ # Raw or preprocessed image dataset (not included in repo)
 ├── models/ # Directory for saving best/final models
@@ -21,7 +21,7 @@ dl_tp/
 │ ├── split_dataset.py
 │ └── visualize_feature_map.py
 └── predict_images/    # Directory for test images
-
+```
 
 
 
@@ -54,15 +54,15 @@ Place your training and validation images in the following structure:
 ```
 data/
 ├── train/
-│   ├── sedan/
-│   ├── suv/
-│   ├── truck/
-│   └── bus/
+│   ├── grandeur/
+│   ├── k5/
+│   ├── santafe/
+│   └── sorento/
 └── val/
-    ├── sedan/
-    ├── suv/
-    ├── truck/
-    └── bus/
+    ├── grandeur/
+    ├── k5/
+    ├── santafe/
+    └── sorento/
 ```
 ### 2. Train the model
 ```
