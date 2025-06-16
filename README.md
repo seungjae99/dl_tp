@@ -20,7 +20,7 @@ dl_tp/
 │ ├── shuffle_dataset.py
 │ ├── split_dataset.py
 │ └── visualize_feature_map.py
-└── predict_images/    # Directory for test images
+└── predict_images/    # Directory for test image samples
 ```
 
 
@@ -70,7 +70,7 @@ python src/train.py
 ```
 ### 3. Run inference on a single image
 ```
-python src/inference.py --img_path predict_images/predict_image.png
+python src/test.py
 ```
 
 ### Visualize with TensorBoard
@@ -93,5 +93,3 @@ The dataset and trained models are not included in this repository due to file s
 - TensorFlow / Keras 2.12+
 
 - matplotlib, scikit-learn, opencv-python
-
-🙋‍♂️

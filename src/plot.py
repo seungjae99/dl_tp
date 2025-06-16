@@ -4,8 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # 1) CSV 파일 경로 (plot.py가 있는 디렉토리 기준)
-train_csv = '../csv/train_loss.csv'
-val_csv   = '../csv/val_loss.csv'
+train_csv = '../csv/train_acc.csv'
+val_csv   = '../csv/val_acc.csv'
 
 # 2) 두 번째 줄(header=1)을 컬럼명으로 읽기
 train_df = pd.read_csv(train_csv, header=1)
@@ -25,7 +25,7 @@ plt.plot(val_steps,   val_vals,   color='red', label='validation')
 
 plt.xlabel('step')
 plt.ylabel('value')
-plt.title('Epoch Loss')
+plt.title('Epoch Accuracy')
 plt.legend(loc='best')
 plt.grid(True)
 plt.tight_layout()
