@@ -68,11 +68,14 @@ data/
 ```
 python src/train.py
 ```
-### 3. Run inference on a single image
+### 3. Run inference on Test data
 ```
 python src/test.py
 ```
-
+### 4. Run inference on a single image
+```
+python src/predict.py
+```
 ### Visualize with TensorBoard
 ```
 tensorboard --logdir=logs/
