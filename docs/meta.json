@@ -1,0 +1,7 @@
+{
+  "desc": "Lightweight CNN for Korean car classification achieving 97% validation accuracy without transfer learning",
+  "tags": [
+    "TensorFlow",
+    "Python"
+  ]
+}

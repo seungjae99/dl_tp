@@ -3,6 +3,8 @@
 This project implements a lightweight CNN-based vehicle type classification model using a small custom image dataset (4 classes, ~200 images per class).  
 The CNN architecture is designed from scratch (without transfer learning) to achieve high accuracy, even with limited data.
 
+**Report:** [https://seungjae99.github.io/dl_tp](https://seungjae99.github.io/dl_tp)
+
 ---
 
 ## Project Structure
