@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CNN 차종 분류 — 기술 포트폴리오</title>
+<style>
+  :root {
+    --ink:       #1a1f2e;
+    --ink-2:     #3d4460;
+    --ink-3:     #6b7490;
+    --divider:   #dde2ee;
+    --bg:        #f7f8fc;
+    --bg-card:   #ffffff;
+    --bg-code:   #f0f2f8;
+    --accent:    #1a56db;
+    --accent-2:  #0e3fa3;
+    --accent-3:  #e8f0fe;
+    --orange:    #c45000;
+    --orange-bg: #fff4ec;
+    --green:     #166534;
+    --green-bg:  #f0faf4;
+    --purple:    #5b21b6;
+    --purple-bg: #f5f3ff;
+    --red:       #991b1b;
+    --red-bg:    #fef2f2;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR',
+                 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  /* Topbar */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(247,248,252,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--divider);
+    padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 52px;
+  }
+  .topbar-logo { font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: var(--accent); text-decoration: none; }
+  .topbar-nav  { display: flex; gap: 24px; list-style: none; }
+  .topbar-nav a { font-size: 12.5px; color: var(--ink-3); text-decoration: none; font-weight: 500; transition: color 0.15s; }
+  .topbar-nav a:hover { color: var(--accent); }
+  @media (max-width: 600px) { .topbar-nav { display: none; } }
+
+  /* Layout */
+  .page { max-width: 900px; margin: 0 auto; padding: 48px 24px 120px; }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 680px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* Hero */
+  .hero { margin-bottom: 36px; padding-bottom: 36px; border-bottom: 1px solid var(--divider); }
+  .hero-eyebrow { font-size: 11.5px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  .hero h1 { font-size: 30px; font-weight: 800; color: var(--ink); line-height: 1.25; margin-bottom: 14px; letter-spacing: -0.5px; }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub { font-size: 15px; color: var(--ink-2); max-width: 680px; line-height: 1.75; margin-bottom: 20px; }
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    font-size: 12px; font-weight: 600; padding: 4px 11px; border-radius: 20px;
+    border: 1px solid; white-space: nowrap;
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  }
+  .b-ros   { color: var(--green);  background: var(--green-bg);  border-color: #bbf7d0; }
+  .b-cpp   { color: var(--accent); background: var(--accent-3);  border-color: #bfdbfe; }
+  .b-gl    { color: var(--purple); background: var(--purple-bg); border-color: #ddd6fe; }
+  .b-qt5   { color: var(--orange); background: var(--orange-bg); border-color: #fed7aa; }
+  .b-cv    { color: #0e7490;       background: #ecfeff;          border-color: #a5f3fc; }
+  .b-tf    { color: var(--orange); background: var(--orange-bg); border-color: #fed7aa; }
+  .b-py    { color: var(--accent); background: var(--accent-3);  border-color: #bfdbfe; }
+  .b-sk    { color: var(--purple); background: var(--purple-bg); border-color: #ddd6fe; }
+  .b-mpl   { color: var(--green);  background: var(--green-bg);  border-color: #bbf7d0; }
+
+  /* Metric Row */
+  .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 44px; }
+  @media (max-width: 680px) { .metric-row { grid-template-columns: 1fr; } }
+  .metric-card {
+    background: var(--bg-card); border: 1px solid var(--divider);
+    border-radius: 10px; padding: 20px 22px; border-top: 3px solid var(--accent);
+  }
+  .metric-num   { font-size: 28px; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 4px; }
+  .metric-label { font-size: 12px; color: var(--ink-3); font-weight: 500; letter-spacing: 0.02em; }
+  .metric-desc  { font-size: 12.5px; color: var(--ink-2); margin-top: 6px; line-height: 1.5; }
+
+  /* Section */
+  .section { margin-bottom: 44px; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .section-num {
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    background: var(--accent-3); padding: 2px 8px; border-radius: 4px;
+    letter-spacing: 0.06em;
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  }
+  .section-title { font-size: 17px; font-weight: 700; color: var(--ink); }
+
+  /* Card */
+  .card { background: var(--bg-card); border: 1px solid var(--divider); border-radius: 10px; padding: 26px 28px; margin-bottom: 14px; }
+  .card-title { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px; }
+
+  /* Callout */
+  .callout { padding: 12px 16px; border-radius: 8px; border-left: 3px solid; font-size: 13.5px; margin-bottom: 14px; line-height: 1.65; }
+  .callout-problem  { background: var(--red-bg);    border-color: #ef4444; color: #7f1d1d; }
+  .callout-solution { background: var(--green-bg);  border-color: #22c55e; color: var(--green); }
+  .callout-info     { background: var(--accent-3);  border-color: var(--accent); color: #1e3a8a; }
+  .callout-warn     { background: var(--orange-bg); border-color: #f97316; color: var(--orange); }
+
+  /* Flow */
+  .flow { display: flex; flex-direction: column; gap: 10px; }
+  .flow-step { display: flex; align-items: flex-start; gap: 14px; }
+  .flow-num {
+    flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent-3); color: var(--accent);
+    font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; margin-top: 2px;
+  }
+  .flow-body { font-size: 13.5px; color: var(--ink-2); line-height: 1.65; padding-top: 3px; }
+  .flow-body strong { color: var(--ink); }
+
+  /* Pipeline */
+  .pipeline { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .pipe-step {
+    background: var(--bg-card); border: 1px solid var(--divider);
+    border-radius: 8px; padding: 10px 14px; text-align: center; min-width: 90px;
+  }
+  .plabel { font-size: 11px; font-weight: 700; color: var(--ink-3); letter-spacing: 0.04em; font-family: 'JetBrains Mono', monospace; }
+  .pval   { font-size: 12px; color: var(--ink-2); margin-top: 3px; }
+  .pipe-arrow { color: var(--ink-3); font-size: 16px; font-weight: 300; }
+  .pipe-note  { font-size: 12.5px; color: var(--ink-3); margin-top: 8px; line-height: 1.5; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    background: var(--bg-code); color: var(--ink-3); font-size: 11.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--divider);
+  }
+  td { color: var(--ink-2); padding: 9px 12px; border-bottom: 1px solid #eef0f6; }
+  tr:last-child td { border-bottom: none; }
+  td code, th code { font-size: 12px; }
+
+  /* Code */
+  pre {
+    background: #1e2130; border: 1px solid #2d3148; border-radius: 8px;
+    padding: 18px 20px;
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    font-size: 12.5px; line-height: 1.65; color: #c9d1e0;
+    overflow-x: auto; margin-bottom: 14px;
+  }
+  .kw   { color: #ff7b72; }
+  .fn   { color: #d2a8ff; }
+  .str  { color: #a5d6ff; }
+  .cmt  { color: #6b7890; font-style: italic; }
+  .num  { color: #79c0ff; }
+  .type { color: #ffa657; }
+  code {
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    font-size: 12.5px; background: var(--bg-code); border: 1px solid var(--divider);
+    border-radius: 3px; padding: 1px 5px; color: #9a3412;
+  }
+
+  /* Result Image */
+  .result-wrap { margin-bottom: 14px; }
+  .result-img { width: 100%; border-radius: 8px; border: 1px solid var(--divider); display: block; }
+  .result-caption { font-size: 12px; color: var(--ink-3); margin-top: 8px; text-align: center; }
+
+  /* Stack */
+  .stack-item { background: var(--bg-card); border: 1px solid var(--divider); border-radius: 8px; padding: 16px 18px; }
+  .stack-name { font-size: 13.5px; font-weight: 700; color: var(--ink); margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+  .stack-role { font-size: 12.5px; color: var(--ink-2); line-height: 1.55; }
+
+  /* Footer */
+  .footer {
+    padding-top: 28px; border-top: 1px solid var(--divider);
+    font-size: 12px; color: var(--ink-3);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 8px;
+  }
+
+  /* Misc */
+  p { color: var(--ink-2); font-size: 13.5px; line-height: 1.75; margin-bottom: 10px; }
+  p:last-child { margin-bottom: 0; }
+  .hi-green { color: var(--green); font-weight: 600; }
+  .hi-red   { color: var(--red);   font-weight: 600; }
+  .hi-blue  { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <a class="topbar-logo" href="#">CHOI SEUNGJAE · PORTFOLIO</a>
+  <ul class="topbar-nav">
+    <li><a href="#background">개발 배경</a></li>
+    <li><a href="#architecture">시스템 구조</a></li>
+    <li><a href="#implementation">구현 상세</a></li>
+    <li><a href="#result">검증 결과</a></li>
+    <li><a href="#stack">기술 스택</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-eyebrow">Deep Learning · Image Classification · 2025</div>
+    <h1>CNN 기반 차종 분류 모델 — <span>전이학습 없는 경량 설계</span></h1>
+    <p class="hero-sub">
+      약 800장의 소규모 데이터셋으로 국산 차종 4종을 분류하는 CNN 모델을 직접 설계하고 학습시켰다.
+      전이학습 없이 Conv-BN-Pool 2블록 구조와 강한 정규화 전략만으로 검증 정확도 96.7%를 달성했으며,
+      모든 클래스에서 AUC 1.00(검증 세트 기준)을 기록했다.
+    </p>
+    <div class="badge-row">
+      <span class="badge b-tf">TensorFlow / Keras</span>
+      <span class="badge b-py">Python</span>
+      <span class="badge b-sk">scikit-learn</span>
+      <span class="badge b-cv">OpenCV</span>
+      <span class="badge b-mpl">matplotlib</span>
+    </div>
+  </header>
+
+  <!-- Metric Row -->
+  <div class="metric-row">
+    <div class="metric-card">
+      <div class="metric-num">96.7%</div>
+      <div class="metric-label">Validation Accuracy</div>
+      <div class="metric-desc">클래스당 약 30장의 검증 데이터 기준. 훈련 정확도 97.2%와 0.5%p 이내 수렴.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num">1.00</div>
+      <div class="metric-label">Validation AUC (전 클래스)</div>
+      <div class="metric-desc">4개 클래스 모두 AUC 1.00 달성. 테스트 세트에서 Santa Fe · Sorento는 0.99.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num">~800장</div>
+      <div class="metric-label">전체 학습 이미지 수</div>
+      <div class="metric-desc">클래스당 190장 학습, ~20장 테스트. 전이학습 없이 달성한 결과.</div>
+    </div>
+  </div>
+
+  <!-- 01 개발 배경 -->
+  <section class="section" id="background">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">개발 배경 및 문제 정의</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">과제 설정</div>
+      <p>딥러닝 수업 텀프로젝트로, 전이학습에 의존하지 않고 소규모 커스텀 데이터셋에서 높은 분류 성능을 달성할 수 있는 경량 CNN 구조를 직접 설계하는 것이 목표였다. 분류 대상은 외형이 유사한 국산 차종 4종이다.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">분류 대상 클래스</div>
+      <table>
+        <thead><tr><th>클래스</th><th>차종 유형</th><th>주요 혼동 대상</th></tr></thead>
+        <tbody>
+          <tr><td><code>grandeur</code></td><td>준대형 세단</td><td>—</td></tr>
+          <tr><td><code>k5</code></td><td>중형 세단</td><td>santafe, sorento (차체 비율 유사)</td></tr>
+          <tr><td><code>santafe</code></td><td>중형 SUV</td><td>k5, sorento</td></tr>
+          <tr><td><code>sorento</code></td><td>중형 SUV</td><td>k5, santafe</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-problem">
+      <strong>핵심 난점:</strong> Santa Fe · Sorento · K5 세 모델은 차체 비율과 측면 실루엣이 유사하여, 소규모 데이터셋에서 시각적 변별력을 확보하기 어렵다. 클래스당 학습 이미지가 190장에 불과해 과적합 위험이 높다.
+    </div>
+    <div class="callout callout-solution">
+      <strong>접근 전략:</strong> 전이학습 대신 L2 정규화·Dropout·BatchNorm·강한 증강의 조합으로 정규화를 극대화하고, GlobalAveragePooling으로 파라미터 수를 최소화하여 소규모 데이터에 최적화된 구조를 설계했다.
+    </div>
+  </section>
+
+  <!-- 02 시스템 구조 -->
+  <section class="section" id="architecture">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">시스템 구조 및 데이터 흐름</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">데이터 파이프라인</div>
+      <div class="pipeline">
+        <div class="pipe-step"><div class="plabel">RAW DATA</div><div class="pval">원본 이미지</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" style="border-color:var(--accent);background:var(--accent-3);">
+          <div class="plabel" style="color:var(--accent);">PREPROCESS</div>
+          <div class="pval">리사이즈+패딩</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step"><div class="plabel">SHUFFLE</div><div class="pval">셔플+리네임</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step"><div class="plabel">SPLIT</div><div class="pval">train/test 분리</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" style="border-color:var(--accent);background:var(--accent-3);">
+          <div class="plabel" style="color:var(--accent);">TRAIN</div>
+          <div class="pval">모델 학습</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step"><div class="plabel">EVALUATE</div><div class="pval">성능 평가</div></div>
+      </div>
+      <p class="pipe-note">모든 스크립트는 <code>src/</code> 디렉토리에서 실행. 경로는 <code>../</code> 기준으로 구성됨.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">스크립트별 역할</div>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div class="flow-body"><strong>image_preprocess.py</strong> — 원본 이미지를 300×200으로 비율 유지 리사이즈 후 zero-padding. <code>multiprocessing.Pool</code>로 CPU 전체 코어 병렬 처리.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div class="flow-body"><strong>shuffle_dataset.py</strong> — 클래스별 이미지를 무작위 셔플 후 <code>{class}_{0000}.ext</code> 형식으로 일괄 리네임.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div class="flow-body"><strong>split_dataset.py</strong> — 클래스당 190장을 train, 나머지를 test로 분리. seed=42 고정으로 재현 가능.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div class="flow-body"><strong>train.py</strong> — ImageDataGenerator로 실시간 증강, validation_split=0.15 적용. EarlyStopping / ReduceLROnPlateau / ModelCheckpoint 콜백 사용.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">5</div>
+          <div class="flow-body"><strong>test.py</strong> — 분리된 test 세트에서 최종 평가. Classification Report · Confusion Matrix · ROC Curve 생성.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 구현 상세 -->
+  <section class="section" id="implementation">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">핵심 구현 상세</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">모델 아키텍처</div>
+      <div class="result-wrap" style="margin-bottom:20px;">
+        <img class="result-img" src="../result_imgs/model_overview.png" alt="Model Architecture" />
+        <div class="result-caption"><strong>Fig. 1</strong> &nbsp;CNN 아키텍처 — Feature Learning(Conv-BN-Pool ×2) + Classification Head(GAP-Dense-Dropout-Softmax)</div>
+      </div>
+      <div class="pipeline" style="margin-bottom:10px;">
+        <div class="pipe-step"><div class="plabel">INPUT</div><div class="pval">200×300×3</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" style="border-color:var(--accent);background:var(--accent-3);">
+          <div class="plabel" style="color:var(--accent);">BLOCK 1</div><div class="pval">Conv32·BN·Pool</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" style="border-color:var(--accent);background:var(--accent-3);">
+          <div class="plabel" style="color:var(--accent);">BLOCK 2</div><div class="pval">Conv64·BN·Pool</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step"><div class="plabel">GAP</div><div class="pval">Global Avg</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step"><div class="plabel">HEAD</div><div class="pval">Dense128·Drop</div></div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step"><div class="plabel">OUTPUT</div><div class="pval">Softmax(4)</div></div>
+      </div>
+      <div class="callout callout-info" style="margin-top:14px;">
+        <strong>GAP 선택 이유:</strong> Flatten 레이어 대신 GlobalAveragePooling2D를 사용해 파라미터 수를 대폭 줄이고, 공간 위치 불변성을 높였다. 소규모 데이터셋에서의 과적합 억제에 효과적이다.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">정규화 전략</div>
+      <table>
+        <thead><tr><th>기법</th><th>설정값</th><th>적용 목적</th></tr></thead>
+        <tbody>
+          <tr><td>L2 Regularization</td><td><code>1e-4</code> — 모든 학습 레이어</td><td>가중치 크기 억제, 일반화 향상</td></tr>
+          <tr><td>BatchNormalization</td><td>각 Conv 블록 후</td><td>내부 공변량 이동 감소, 학습 안정화</td></tr>
+          <tr><td>Dropout</td><td><code>0.6</code> — Dense 레이어 후</td><td>소규모 데이터 과적합 방지 (높은 비율)</td></tr>
+          <tr><td>Class Weight</td><td>sklearn <code>compute_class_weight('balanced')</code></td><td>클래스 불균형 보정</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">데이터 증강 구성</div>
+<pre><span class="fn">ImageDataGenerator</span>(
+    rescale            = <span class="num">1./255</span>,
+    rotation_range     = <span class="num">30</span>,
+    zoom_range         = <span class="num">0.3</span>,
+    width_shift_range  = <span class="num">0.2</span>,
+    height_shift_range = <span class="num">0.2</span>,
+    horizontal_flip    = <span class="kw">True</span>,
+    brightness_range   = (<span class="num">0.7</span>, <span class="num">1.3</span>),
+    shear_range        = <span class="num">0.2</span>,
+    validation_split   = <span class="num">0.15</span>   <span class="cmt"># 별도 val 디렉토리 없이 내부 분할</span>
+)</pre>
+      <p>별도의 검증 디렉토리 없이 <code>validation_split=0.15</code>로 학습 데이터에서 실시간 분할. 증강은 학습 세트에만 적용되고, 검증·테스트 세트는 rescale만 적용.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">학습 설정 및 콜백</div>
+      <div class="grid-2">
+        <table>
+          <thead><tr><th>하이퍼파라미터</th><th>값</th></tr></thead>
+          <tbody>
+            <tr><td>Optimizer</td><td><code>Adam (lr=5e-4)</code></td></tr>
+            <tr><td>Loss</td><td><code>categorical_crossentropy</code></td></tr>
+            <tr><td>Batch size</td><td><code>32</code></td></tr>
+            <tr><td>Max epochs</td><td><code>200</code></td></tr>
+          </tbody>
+        </table>
+        <table>
+          <thead><tr><th>콜백</th><th>설정</th></tr></thead>
+          <tbody>
+            <tr><td>EarlyStopping</td><td>patience=30, val_acc 기준</td></tr>
+            <tr><td>ReduceLROnPlateau</td><td>factor=0.5, patience=10</td></tr>
+            <tr><td>ModelCheckpoint</td><td>best_model.keras 저장</td></tr>
+            <tr><td>TensorBoard</td><td>타임스탬프 서브디렉토리</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout callout-info" style="margin-top:14px;">
+        <strong>EarlyStopping patience=30 설정 이유:</strong> 검증 정확도는 학습 중 큰 진폭으로 진동하는 경향이 있어, patience를 낮게 설정하면 실제 수렴 전에 조기 종료될 위험이 있다. 30 에폭의 유예를 두어 안정적인 수렴을 보장했다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 검증 결과 -->
+  <section class="section" id="result">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">검증 결과</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">학습 곡선</div>
+      <div class="grid-2">
+        <div class="result-wrap">
+          <img class="result-img" src="../result_imgs/accuracy_plot.png" alt="Epoch Accuracy" />
+          <div class="result-caption"><strong>Fig. 2</strong> &nbsp;Epoch Accuracy</div>
+        </div>
+        <div class="result-wrap">
+          <img class="result-img" src="../result_imgs/loss_plot.png" alt="Epoch Loss" />
+          <div class="result-caption"><strong>Fig. 3</strong> &nbsp;Epoch Loss</div>
+        </div>
+      </div>
+      <table style="margin-top:16px;">
+        <thead><tr><th>구분</th><th>최종 Accuracy</th><th>최종 Loss</th></tr></thead>
+        <tbody>
+          <tr><td>Train</td><td class="hi-blue">0.9721</td><td>0.1247</td></tr>
+          <tr><td>Validation</td><td class="hi-blue">0.9667</td><td>0.1287</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top:12px;">두 곡선 모두 진동 없이 수렴하며, train/val 간 격차가 0.5%p 이내로 유지됐다. L2 + Dropout 조합이 소규모 데이터셋에서 효과적으로 작동함을 확인했다.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">검증 세트 (Validation Set) 클래스별 성능</div>
+      <table>
+        <thead><tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1-score</th><th>AUC</th></tr></thead>
+        <tbody>
+          <tr><td><code>grandeur</code></td><td class="hi-green">1.00</td><td class="hi-green">1.00</td><td class="hi-green">1.00</td><td class="hi-green">1.00</td></tr>
+          <tr><td><code>k5</code></td><td>0.88</td><td class="hi-green">1.00</td><td>0.94</td><td class="hi-green">1.00</td></tr>
+          <tr><td><code>santafe</code></td><td class="hi-green">1.00</td><td>0.90</td><td>0.95</td><td class="hi-green">1.00</td></tr>
+          <tr><td><code>sorento</code></td><td class="hi-green">1.00</td><td>0.97</td><td>0.98</td><td class="hi-green">1.00</td></tr>
+        </tbody>
+      </table>
+      <div class="result-wrap" style="margin-top:16px;">
+        <img class="result-img" src="../result_imgs/confusion_mat_and_roc_curve_val.png" alt="Validation Confusion Matrix and ROC Curve" />
+        <div class="result-caption"><strong>Fig. 4</strong> &nbsp;Validation Confusion Matrix · Multi-class ROC Curve (전 클래스 AUC = 1.00)</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">테스트 세트 (Test Set) 클래스별 성능</div>
+      <table>
+        <thead><tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1-score</th><th>AUC</th></tr></thead>
+        <tbody>
+          <tr><td><code>grandeur</code></td><td class="hi-green">1.00</td><td>0.95</td><td>0.97</td><td class="hi-green">1.00</td></tr>
+          <tr><td><code>k5</code></td><td class="hi-red">0.71</td><td class="hi-green">1.00</td><td>0.83</td><td class="hi-green">1.00</td></tr>
+          <tr><td><code>santafe</code></td><td class="hi-green">1.00</td><td>0.80</td><td>0.89</td><td>0.99</td></tr>
+          <tr><td><code>sorento</code></td><td>0.94</td><td>0.80</td><td>0.86</td><td>0.99</td></tr>
+        </tbody>
+      </table>
+      <div class="result-wrap" style="margin-top:16px;">
+        <img class="result-img" src="../result_imgs/confusion_mat_and_roc_curve_test.png" alt="Test Confusion Matrix and ROC Curve" />
+        <div class="result-caption"><strong>Fig. 5</strong> &nbsp;Test Confusion Matrix · Multi-class ROC Curve (Grandeur / K5 AUC = 1.00, Santa Fe / Sorento AUC = 0.99)</div>
+      </div>
+      <div class="callout callout-warn" style="margin-top:14px;">
+        <strong>K5 Precision 0.71 — 주요 실패 케이스:</strong> Santa Fe · Sorento 샘플이 K5로 오분류되어 K5 precision이 하락했다. 세 모델은 국산 중형 차량으로 측면 실루엣이 유사하며, 클래스당 20장의 소규모 테스트 세트에서 이 경향이 두드러진다. 데이터 다양성 확보(다각도 이미지)가 가장 효과적인 개선 방향이다.
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 기술 스택 -->
+  <section class="section" id="stack">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">기술 스택 및 환경</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">사용 기술</div>
+      <div class="grid-3">
+        <div class="stack-item">
+          <div class="stack-name">TensorFlow / Keras</div>
+          <div class="stack-role">모델 정의, 학습, 추론. ImageDataGenerator 기반 실시간 증강 및 validation_split 처리.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-name">scikit-learn</div>
+          <div class="stack-role">클래스 가중치 계산, Classification Report, Confusion Matrix, ROC/AUC 산출.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-name">OpenCV (cv2)</div>
+          <div class="stack-role">비율 유지 리사이즈 및 zero-padding 전처리. multiprocessing으로 병렬 처리.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-name">matplotlib</div>
+          <div class="stack-role">Confusion Matrix, ROC Curve, Accuracy/Loss 곡선 시각화 및 저장.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-name">pandas</div>
+          <div class="stack-role">TensorBoard CSV export 파일 파싱 후 학습 곡선 재플롯 (plot.py).</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-name">Python 표준 라이브러리</div>
+          <div class="stack-role">multiprocessing.Pool (병렬 전처리), random (셔플/분할 seed 고정), os / shutil (파일 관리).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">개발 환경</div>
+      <table>
+        <thead><tr><th>항목</th><th>버전 / 설정</th></tr></thead>
+        <tbody>
+          <tr><td>Python</td><td>3.8+</td></tr>
+          <tr><td>TensorFlow / Keras</td><td>2.12+</td></tr>
+          <tr><td>모델 저장 포맷</td><td><code>.keras</code> (best_model.keras, saved_model_tf.keras)</td></tr>
+          <tr><td>학습 로그</td><td>TensorBoard (<code>logs/</code> 타임스탬프 서브디렉토리)</td></tr>
+          <tr><td>재현성</td><td>seed=42 고정 (데이터 분할 및 학습)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div><strong>최승재 (Choi Seungjae)</strong> · 자율운항시스템공학과 · 충남대학교</div>
+    <div>CNN 차종 분류 · 딥러닝 텀프로젝트 · 2025</div>
+  </footer>
+
+</div>
+</body>
+</html>
