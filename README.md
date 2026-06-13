@@ -1,100 +1,88 @@
 # Car Classification with CNN (Keras)
 
-This project implements a lightweight CNN-based vehicle type classification model using a small custom image dataset (4 classes, ~200 images per class).  
-The CNN architecture is designed from scratch (without transfer learning) to achieve high accuracy, even with limited data.
+A lightweight CNN trained from scratch to classify four Korean car models — no transfer learning, ~800 training images.
 
-**Report:** [https://seungjae99.github.io/dl_tp](https://seungjae99.github.io/dl_tp)
-
----
-
-## Project Structure
-```
-dl_tp/
-├── dataset/ # Raw or preprocessed image dataset (not included in repo)
-├── models/ # Directory for saving best/final models
-├── logs/ # TensorBoard training logs
-├── src/
-│ ├── train.py
-│ ├── test.py
-│ ├── image_preprocess.py
-│ ├── plot.py
-│ ├── predict.py
-│ ├── shuffle_dataset.py
-│ ├── split_dataset.py
-│ └── visualize_feature_map.py
-└── predict_images/    # Directory for test image samples
-```
-
-
+**Report:** [seungjae99.github.io/dl_tp](https://seungjae99.github.io/dl_tp)
 
 ---
 
-## Key Features
+## Classes
 
-- Custom-designed, **lightweight CNN** (no transfer learning)
-- Conv-BatchNorm-Pool block architecture
-- Training callbacks: `EarlyStopping`, `ModelCheckpoint`, `ReduceLROnPlateau`
-- TensorBoard logging for monitoring training
-- Automatic model saving based on best validation accuracy
+| Class | Category |
+|-------|----------|
+| `grandeur` | Executive sedan |
+| `k5` | Mid-size sedan |
+| `santafe` | Mid-size SUV |
+| `sorento` | Mid-size SUV |
 
 ---
 
-## Class Categories
+## Model Architecture
 
-- `grandeur`
-- `k5`
-- `santafe`
-- `sorento`
+![Model Architecture](result_imgs/model_overview.png)
+
+Two Conv-BN-Pool blocks for feature extraction, followed by GlobalAveragePooling, Dense(128), and Dropout(0.6).
+L2 regularization is applied to all trainable layers.
+
+---
+
+## Results
+
+| | Accuracy | Loss |
+|--|--|--|
+| Train | 0.9721 | 0.1247 |
+| Validation | 0.9667 | 0.1287 |
+
+### Training Curves
+
+![Accuracy](result_imgs/accuracy_plot.png) ![Loss](result_imgs/loss_plot.png)
+
+### Test Set Evaluation
+
+![Test Confusion Matrix & ROC](result_imgs/confusion_mat_and_roc_curve_test.png)
+
+| Class | Precision | Recall | F1 |
+|-------|-----------|--------|----|
+| Grandeur | 1.00 | 0.95 | 0.97 |
+| K5 | 0.71 | 1.00 | 0.83 |
+| Santa Fe | 1.00 | 0.80 | 0.89 |
+| Sorento | 0.94 | 0.80 | 0.86 |
 
 ---
 
 ## How to Run
 
-### 1. Prepare the dataset
-Place your training and validation images in the following structure:
+All scripts are run from the `src/` directory.
 
-```
-data/
-├── train/
-│   ├── grandeur/
-│   ├── k5/
-│   ├── santafe/
-│   └── sorento/
-└── val/
-    ├── grandeur/
-    ├── k5/
-    ├── santafe/
-    └── sorento/
-```
-### 2. Train the model
-```
+```bash
+# 1. Preprocess images (resize + zero-pad to 300x200)
+python src/image_preprocess.py
+
+# 2. Shuffle and rename
+python src/shuffle_dataset.py
+
+# 3. Split into train/test
+python src/split_dataset.py
+
+# 4. Train
 python src/train.py
-```
-### 3. Run inference on Test data
-```
+
+# 5. Evaluate on test set
 python src/test.py
-```
-### 4. Run inference on a single image
-```
+
+# 6. Single image inference
 python src/predict.py
 ```
-### Visualize with TensorBoard
-```
+
+```bash
+# TensorBoard
 tensorboard --logdir=logs/
 ```
-Then open `http://localhost:6006` in your browser.
 
-### Saved Models
-- Best model: `models/best_model.keras`
+---
 
-- Final model: `models/saved_model_tf.keras`
+## Environment
 
-### Notes
-The dataset and trained models are not included in this repository due to file size limitations.
-
-### Development Environment
 - Python 3.8+
-
 - TensorFlow / Keras 2.12+
-
-- matplotlib, scikit-learn, opencv-python
+- opencv-python, scikit-learn, matplotlib, pandas, tqdm
